@@ -785,20 +785,20 @@ function calculerColonnes(ivList, H_HAUTEUR) {
   var tries = ivList.slice().sort(function(a, b) {
     return heure2min(a.heureDebut) - heure2min(b.heureDebut);
   });
-  var colonnes = []; 
+  var colonnes = [];
 
   tries.forEach(function(iv) {
     var mDeb = heure2min(iv.heureDebut);
     var mFin = heure2min(iv.heureFin);
     if (!mFin || mFin <= mDeb) mFin = mDeb + 60;
+    iv._mDeb = mDeb;
+    iv._mFin = mFin;
 
     var placee = false;
     for (var c = 0; c < colonnes.length; c++) {
       var col = colonnes[c];
       var dernierIv = col[col.length - 1];
-      var dernierFin = heure2min(dernierIv.heureFin);
-      if (!dernierFin || dernierFin <= heure2min(dernierIv.heureDebut)) dernierFin = heure2min(dernierIv.heureDebut) + 60;
-      if (mDeb >= dernierFin) {
+      if (mDeb >= dernierIv._mFin) {
         col.push(iv);
         iv._col = c;
         placee = true;
@@ -811,11 +811,17 @@ function calculerColonnes(ivList, H_HAUTEUR) {
     }
   });
 
-  var nbCols = colonnes.length;
+  // Pour chaque iv, nbCols = nb de colonnes parmi ses "voisins" qui se chevauchent
   var result = {};
   tries.forEach(function(iv) {
-    result[iv.id] = { col: iv._col, nbCols: nbCols };
-    delete iv._col;
+    var maxCol = iv._col;
+    tries.forEach(function(other) {
+      if (other._mDeb < iv._mFin && other._mFin > iv._mDeb) {
+        if (other._col > maxCol) maxCol = other._col;
+      }
+    });
+    result[iv.id] = { col: iv._col, nbCols: maxCol + 1 };
+    delete iv._col; delete iv._mDeb; delete iv._mFin;
   });
   return result;
 }
