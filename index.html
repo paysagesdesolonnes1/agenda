@@ -1079,7 +1079,7 @@ function ouvrirNouveauCreneau(dateStr, heure) {
 function ouvrirCreneau(id) {
   var iv=DB.interventions.find(function(x){return x.id===id;});
   if(!iv) return;
-  creneauCourant=iv; tachesCreneau=[...(iv.taches||[])];
+  creneauCourant=iv; tachesCreneau=(iv.taches||[]).slice();
   clientSel=DB.clients.find(function(c){return c.id===iv.clientId;})||null;
   document.getElementById('modalCTitre').textContent='Modifier le créneau';
   document.getElementById('inputClient').value=clientSel?(clientSel.prenom?clientSel.prenom+' ':'')+clientSel.nom:iv.nomLibre||'';
