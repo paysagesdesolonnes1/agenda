@@ -585,7 +585,7 @@ nav { background: var(--vert-c); padding: 0 14px; display: flex; align-items: ce
     </div>
     <div class="fg"><label>Lieu / Adresse</label><input type="text" id="inputLieu" placeholder="Adresse du chantier"></div>
     <div class="fg"><label>Remarques</label><textarea id="inputNote" rows="2" placeholder="Notes, observations..."></textarea></div>
-    <div class="fg" id="fgStatut" style="display:none"><label>Statut</label>
+    <div class="fg" id="fgStatut"><label>Statut</label>
       <select id="inputStatut">
         <option value="planifie">Planifié</option>
         <option value="en_cours">En cours</option>
@@ -595,7 +595,6 @@ nav { background: var(--vert-c); padding: 0 14px; display: flex; align-items: ce
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="fermerModalC()">Annuler</button>
-      <button class="btn btn-orange" id="btnTerminer" style="display:none" onclick="marquerTermine()">✓ Terminer</button>
       <button class="btn btn-rouge" id="btnSuppC" style="display:none" onclick="supprimerCreneau()">Supprimer</button>
       
       <button class="btn" style="border-color: var(--vert); color: var(--vert);" onclick="sauvegarderCreneau(null, true)">+ Suivant</button>
@@ -1069,8 +1068,7 @@ function ouvrirNouveauCreneau(dateStr, heure) {
 
   document.getElementById('inputLieu').value='';
   document.getElementById('inputNote').value='';
-  document.getElementById('fgStatut').style.display='none';
-  document.getElementById('btnTerminer').style.display='none';
+  document.getElementById('fgStatut').style.display='block';
   document.getElementById('btnSuppC').style.display='none';
   renderTaches(); peuplerCollab(); peuplerTagPredefs();
   document.getElementById('overlayC').classList.add('open');
@@ -1091,7 +1089,6 @@ function ouvrirCreneau(id) {
   document.getElementById('inputNote').value=iv.note||'';
   document.getElementById('inputStatut').value=iv.statut||'planifie';
   document.getElementById('fgStatut').style.display='block';
-  document.getElementById('btnTerminer').style.display=iv.statut!=='termine'?'inline-block':'none';
   document.getElementById('btnSuppC').style.display='inline-block';
   renderTaches(); peuplerCollab(iv.collab); peuplerTagPredefs();
   document.getElementById('overlayC').classList.add('open');
