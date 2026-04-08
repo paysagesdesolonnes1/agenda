@@ -428,9 +428,20 @@ nav { background: var(--vert-c); padding: 0 14px; display: flex; align-items: ce
     top: 0;
     z-index: 40;
   }
+  .barre-mobile-extra {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
 }
 /* Placer les notifications au-dessus du menu mobile */
 .rappels-panel { z-index: 10000 !important; }
+.barre-mobile-extra { display: none; }
+@media (max-width: 640px) {
+  .barre-mobile-extra { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .search-agenda { display: none; }
+}
 </style>
 </head>
 <body>
@@ -474,6 +485,10 @@ nav { background: var(--vert-c); padding: 0 14px; display: flex; align-items: ce
     <button class="btn" onclick="ouvrirNotes()" style="white-space:nowrap">📝 Notes</button>
     <input type="text" class="search-input search-agenda" placeholder="🔍 Rechercher un client..." oninput="filtrerAgenda(this.value)">
     
+    <div class="barre-mobile-extra">
+     <button class="btn" onclick="ouvrirNotes()" style="white-space:nowrap">📝 Notes</button>
+     <input type="text" class="search-input search-agenda" placeholder="🔍 Rechercher..." oninput="filtrerAgenda(this.value)" style="flex:1">
+    </div>
     <div style="display:flex;gap:5px;">
       <button class="btn btn-vert" onclick="ouvrirNouveauCreneau()">+ Créneau</button>
       <div style="position: relative; width: 40px; height: 35px; background: white; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; cursor: pointer;">
