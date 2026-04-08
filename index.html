@@ -938,9 +938,7 @@ function renderJour() {
   if (!container) return;
   container.innerHTML = '';
 
-  // --- 1. LE BANDEAU DES JOURS (Sorti du cadre) ---
   var headerRow = document.createElement('div');
-  // On lui donne exactement la même structure de colonnes que la grille
   headerRow.style.display = 'grid';
   headerRow.style.gridTemplateColumns = '40px repeat(3, 1fr)';
   headerRow.style.background = 'white';
@@ -950,22 +948,70 @@ function renderJour() {
   headerRow.style.position = 'relative';
   headerRow.style.zIndex = '60';
   headerRow.style.flexShrink = '0';
-
-  // Case vide en haut à gauche (au-dessus des heures)
   headerRow.innerHTML = '<div style="border-right: 1px solid #f0ede7; background: var(--gris-c);"></div>';
-
+  
   for (var i = 0; i < 3; i++) {
     var d = new Date(jourSelectionne);
     d.setDate(d.getDate() + i);
     var isAuj = fmt(d) === fmt(new Date());
-    
     var headerClasse = 'm-grid-day-header' + (isAuj ? ' auj' : '');
-    // On met le texte du jour
     headerRow.innerHTML += '<div class="'+headerClasse+'" style="border-right: 1px solid #f0ede7; border-bottom: none;">' +
                  '<span class="m-day-name">'+ JOURS[d.getDay() === 0 ? 6 : d.getDay()-1] +'</span>' +
                  '<span class="m-day-num">'+ d.getDate() +'</span></div>';
   }
   container.appendChild(headerRow);
+
+  var grid = document.createElement('div');
+  grid.className = 'mobile-grid-container';
+  grid.style.borderRadius = '0 0 var(--radius) var(--radius)';
+  grid.style.borderTop = 'none';
+  
+  var hourCol = '<div class="m-grid-hour-col">';
+  for(var h=7; h<=19; h++) { hourCol += '<div class="m-grid-hour-label">' + h + 'h</div>'; }
+  hourCol += '</div>';
+  grid.innerHTML += hourCol;
+
+  for (var i = 0; i < 3; i++) {
+    var d = new Date(jourSelectionne);
+    d.setDate(d.getDate() + i);
+    var dStr = fmt(d);
+    var dayCol = document.createElement('div');
+    dayCol.className = 'm-grid-day-col';
+
+    var colContent = '';
+    for(var h=7; h<=19; h++) {
+      colContent += '<div style="height:50px; border-bottom:1px solid #f9f9f9; box-sizing:border-box;" onclick="ouvrirNouveauCreneau(\''+dStr+'\', \''+h+':00\')"></div>';
+    }
+
+    // --- CORRECTION ICI : ON CALCULE LES COLONNES POUR LE MOBILE ---
+    var ivsJour = DB.interventions.filter(function(iv) { return fmt(iv.date) === dStr && matchRecherche(iv); });
+    var colsInfo = calculerColonnes(ivsJour, 50); 
+
+    ivsJour.forEach(function(iv) {
+      var c = DB.clients.find(function(x) { return x.id === iv.clientId; });
+      var nom = c ? c.nom : iv.nomLibre || '?';
+      var statutClass = iv.statut || 'planifie'; 
+      var mDeb = heure2min(iv.heureDebut);
+      var mFin = heure2min(iv.heureFin) || (mDeb + 60);
+      
+      var top = ((mDeb - 420) / 60) * 50; 
+      var hauteur = ((mFin - mDeb) / 60) * 50 - 2;
+
+      // Calcul de la largeur dynamique
+      var info = colsInfo[iv.id] || { col: 0, nbCols: 1 };
+      var largeurPct = 96 / info.nbCols; 
+      var leftPct = 2 + (info.col * largeurPct);
+
+      colContent += '<div class="m-creneau ' + statutClass + '" ' +
+                    'style="top:'+top+'px; height:'+hauteur+'px; width:'+largeurPct+'%; left:'+leftPct+'%;" ' +
+                    'onclick="event.stopPropagation();ouvrirCreneau(\''+iv.id+'\')">' +
+                    '<b>' + nom + '</b></div>';
+    });
+    dayCol.innerHTML = colContent;
+    grid.appendChild(dayCol);
+  }
+  container.appendChild(grid);
+}
 
   // --- 2. LA GRILLE DE TRAVAIL (Heures + Créneaux) ---
   var grid = document.createElement('div');
