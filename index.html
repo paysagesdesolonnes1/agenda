@@ -1706,13 +1706,18 @@ function showSync(msg,err){
 }
 function hideSync(){document.getElementById('syncBar').style.display='none';}
 
+// --- NOUVEAU : Le bouclier temporel ---
+var blockSyncUntil = 0; 
+
 function syncSave(type, data) {
   var url = DB.urlScript || document.getElementById('paramUrl').value.trim();
-  
   if (!url) {
     showToast("Erreur : URL non configurée dans les paramètres.");
     return;
-}
+  }
+
+  // On active le bouclier : on bloque la synchro automatique pendant 8 secondes
+  blockSyncUntil = Date.now() + 8000;
 
   fetch(url, {
     method: 'POST',
@@ -1730,9 +1735,13 @@ function syncSave(type, data) {
   });
 }
 
-function syncDelete(type,id){
+function syncDelete(type, id){
   var url = DB.urlScript;
   if(!url) return;
+  
+  // On active le bouclier aussi pour les suppressions (8 secondes)
+  blockSyncUntil = Date.now() + 8000; 
+  
   fetch(url, {
     method: 'POST',
     mode: 'no-cors',
@@ -2009,15 +2018,18 @@ function renderSearchResults() {
 //  SYNCHRONISATION SILENCIEUSE (MULTI-UTILISATEURS)
 // ══════════════════════════════════════
 function syncAutomatique() {
-  if(!DB.urlScript) return; // Si pas configuré, on ne fait rien
+  if(!DB.urlScript) return; 
   
-  // On va chercher les données en cachette
+  // LE BOUCLIER EST LÀ : Si on a sauvegardé il y a moins de 8 secondes, on annule la synchro pour ne pas effacer notre travail local
+  if (Date.now() < blockSyncUntil) {
+    console.log("Synchro auto ignorée (bouclier actif)");
+    return; 
+  }
+  
   fetch(DB.urlScript+'?action=load')
     .then(function(r){return r.json();})
     .then(function(d){
-      // On met à jour la base de données invisible
       if(d.clients) {
-        // Bouclier : on protège les devis locaux
         d.clients.forEach(function(clientServeur) {
           var clientLocal = DB.clients.find(function(lc) { return lc.id === clientServeur.id; });
           if (clientLocal && clientLocal.devis) {
@@ -2037,20 +2049,16 @@ function syncAutomatique() {
       if(d.tachesPredef) DB.tachesPredef=d.tachesPredef;
       if(d.collaborateurs) DB.collaborateurs=d.collaborateurs;
       
-      // On sauvegarde dans le navigateur
-      saveLocal(); 
+      saveLocal();
+      renderAgenda();
       
-      // On rafraîchit l'agenda à l'écran sans faire clignoter l'app
-      renderAgenda(); 
-      
-      // Si on est sur l'onglet client, on le met à jour aussi
       var pageClients = document.getElementById('page-clients');
       var vueClients = document.getElementById('vueClients');
       if(pageClients && pageClients.classList.contains('active') && vueClients.style.display !== 'none') {
          afficherClients();
       }
     })
-    .catch(function(){ /* S'il n'y a pas de réseau, on ne dit rien et on n'affiche pas d'erreur */ });
+    .catch(function(){});
 }
 
 // DÉCLENCHEUR 1 : Quand on rallume l'écran ou qu'on revient sur l'onglet
