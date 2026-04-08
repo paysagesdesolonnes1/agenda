@@ -848,6 +848,15 @@ function renderAgenda() {
   });
   document.getElementById('gridHead').innerHTML = head;
 
+  var colonnesParJour = {};
+  jours.forEach(function(d) {
+    var ds = fmt(d);
+    var tousJour = DB.interventions.filter(function(iv) {
+      return fmt(iv.date) === ds && iv.heureDebut && matchRecherche(iv);
+    });
+    colonnesParJour[ds] = calculerColonnes(tousJour, H_HAUTEUR);
+  });
+
   var body = '';
   HEURES.forEach(function(h) {
     body += '<div class="grid-row"><div class="hl">' + h + 'h</div>';
@@ -857,12 +866,8 @@ function renderAgenda() {
       var ici = DB.interventions.filter(function(iv) {
         return fmt(iv.date) === ds && iv.heureDebut && heure2min(iv.heureDebut) >= h * 60 && heure2min(iv.heureDebut) < (h + 1) * 60 && matchRecherche(iv);
       });
-      var tousJour = DB.interventions.filter(function(iv) {
-        return fmt(iv.date) === ds && iv.heureDebut && matchRecherche(iv);
-      });
 
-      var colonnes = calculerColonnes(tousJour, H_HAUTEUR);
-
+      var colonnes = colonnesParJour[ds];
       body += '<div class="gc" onclick="ouvrirNouveauCreneau(\'' + ds + '\',\'' + h + ':00\')">';
 
       ici.forEach(function(iv) {
