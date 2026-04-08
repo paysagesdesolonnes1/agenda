@@ -940,14 +940,10 @@ function renderJour() {
   container.innerHTML = '';
 
   var headerRow = document.createElement('div');
-  headerRow.style.display = 'grid';
+  headerRow.className = 'mobile-grid-container';
   headerRow.style.gridTemplateColumns = '40px repeat(3, 1fr)';
-  headerRow.style.background = 'white';
-  headerRow.style.border = '1px solid var(--border)';
   headerRow.style.borderBottom = '2px solid var(--border)';
   headerRow.style.borderRadius = 'var(--radius) var(--radius) 0 0';
-  headerRow.style.position = 'relative';
-  headerRow.style.zIndex = '60';
   headerRow.style.flexShrink = '0';
   headerRow.innerHTML = '<div style="border-right: 1px solid #f0ede7; background: var(--gris-c);"></div>';
   
@@ -984,8 +980,9 @@ function renderJour() {
       colContent += '<div style="height:50px; border-bottom:1px solid #f9f9f9; box-sizing:border-box;" onclick="ouvrirNouveauCreneau(\''+dStr+'\', \''+h+':00\')"></div>';
     }
 
-    // --- CORRECTION ICI : ON CALCULE LES COLONNES POUR LE MOBILE ---
     var ivsJour = DB.interventions.filter(function(iv) { return fmt(iv.date) === dStr && matchRecherche(iv); });
+    
+    // On utilise la même logique que sur ordi pour calculer les colonnes
     var colsInfo = calculerColonnes(ivsJour, 50); 
 
     ivsJour.forEach(function(iv) {
@@ -998,13 +995,13 @@ function renderJour() {
       var top = ((mDeb - 420) / 60) * 50; 
       var hauteur = ((mFin - mDeb) / 60) * 50 - 2;
 
-      // Calcul de la largeur dynamique
+      // --- CALCUL DYNAMIQUE ---
       var info = colsInfo[iv.id] || { col: 0, nbCols: 1 };
-      var largeurPct = 96 / info.nbCols; 
-      var leftPct = 2 + (info.col * largeurPct);
+      var largeurPct = 100 / info.nbCols; // Divise 100% par le nombre d'interv. en même temps
+      var leftPct = info.col * largeurPct; // Décale selon la colonne
 
       colContent += '<div class="m-creneau ' + statutClass + '" ' +
-                    'style="top:'+top+'px; height:'+hauteur+'px; width:'+largeurPct+'%; left:'+leftPct+'%;" ' +
+                    'style="top:'+top+'px; height:'+hauteur+'px; width:'+(largeurPct - 2)+'%; left:'+leftPct+'%;" ' +
                     'onclick="event.stopPropagation();ouvrirCreneau(\''+iv.id+'\')">' +
                     '<b>' + nom + '</b></div>';
     });
