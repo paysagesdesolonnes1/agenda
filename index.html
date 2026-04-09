@@ -1053,7 +1053,9 @@ function renderJour() {
       colContent += '<div class="m-creneau ' + statutClass + '" ' +
                     'style="top:'+top+'px; height:'+hauteur+'px; width:'+(largeurPct - 2)+'%; left:'+leftPct+'%;" ' +
                     'onclick="event.stopPropagation();ouvrirCreneau(\''+iv.id+'\')">' +
-                    '<b>' + nom + '</b></div>';
+                    '<b>' + nom + '</b>' +
+'<div style="font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (iv.taches||[]).join(', ') + '</div>' +
+'</div>';
     });
     dayCol.innerHTML = colContent;
     grid.appendChild(dayCol);
