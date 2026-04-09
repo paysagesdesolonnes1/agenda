@@ -505,7 +505,7 @@ nav { background: var(--vert-c); padding: 0 14px; display: flex; align-items: ce
   <div id="vueClients">
     <div class="toolbar">
       <button class="btn btn-sm" onclick="ouvrirListeDevisAcceptes()" style="background: var(--vert-c); color: var(--vert); border-color: var(--vert); white-space: nowrap; padding: 7px 10px; font-size: 12px;">📋 Devis acceptés</button>
-      
+      <button class="btn btn-sm" onclick="ouvrirContrats()" style="background: var(--brun-c); color: var(--brun); border-color: var(--brun); white-space: nowrap; padding: 7px 10px; font-size: 12px;">🌿 Contrats</button>
       <input type="text" class="search-input" placeholder="🔍 Rechercher..." id="searchClients" oninput="filtrerClients()" style="max-width:180px">
       
       <button class="btn btn-vert" onclick="ouvrirModalClient()">+ Fiche </button>
@@ -606,7 +606,6 @@ nav { background: var(--vert-c); padding: 0 14px; display: flex; align-items: ce
       
       <button class="btn" id="btnDupliquerC" style="background: var(--gris-c);" onclick="dupliquerCreneau()">Dupliquer</button>
       
-      <button class="btn" style="border-color: var(--vert); color: var(--vert);" onclick="sauvegarderCreneau(null, true)">+ Suivant</button>
       <button class="btn btn-vert" onclick="sauvegarderCreneau()">Enregistrer</button>
     </div>
   </div>
@@ -625,6 +624,10 @@ nav { background: var(--vert-c); padding: 0 14px; display: flex; align-items: ce
     <div class="fg"><label>Ville</label><input type="text" id="clientVille"></div>
     <div class="fg"><label>Notes</label><textarea id="clientNotes" rows="2" placeholder="Code portail, animaux..."></textarea></div>
     <div class="modal-actions">
+      <div class="fg" style="display:flex;align-items:center;gap:10px;margin-top:4px">
+      <input type="checkbox" id="clientEntretien" style="width:18px;height:18px;cursor:pointer">
+      <label style="font-size:13px;font-weight:600;color:var(--texte);text-transform:none;letter-spacing:0">Entretien à l'année</label>
+    </div>
       <button class="btn" onclick="fermerModalClient()">Annuler</button>
       <button class="btn btn-rouge" id="btnSuppClient" style="display:none" onclick="supprimerClient()">Supprimer</button>
       <button class="btn btn-vert" onclick="sauvegarderClient()">Enregistrer</button>
@@ -1495,6 +1498,7 @@ function ouvrirModalClient(id){
   document.getElementById('clientNotes').value=clientCourant?clientCourant.notes||'':'';
   document.getElementById('btnSuppClient').style.display=clientCourant?'inline-block':'none';
   document.getElementById('overlayClient').classList.add('open');
+  document.getElementById('clientEntretien').checked = clientCourant ? clientCourant.entretien || false : false;
 }
 
 function fermerModalClient(){document.getElementById('overlayClient').classList.remove('open');}
@@ -1515,6 +1519,7 @@ function sauvegarderClient(){
   fermerModalClient(); afficherClients();
   syncSave('client',c);
   showToast(clientCourant?'Client mis à jour.':'Client créé !');
+  c.entretien = document.getElementById('clientEntretien').checked;
 }
 
 function supprimerClient(){
@@ -2163,7 +2168,28 @@ function sauvegarderNotes() {
   fermerNotes();
   showToast('Notes enregistrées !');
 }
-  
+function ouvrirContrats() {
+  var container = document.getElementById('contenuContrats');
+  var clients = DB.clients.filter(function(c) { return c.entretien; });
+  if (!clients.length) {
+    container.innerHTML = '<p style="color:var(--texte-s);text-align:center;padding:20px;">Aucun client avec entretien à l\'année.</p>';
+  } else {
+    container.innerHTML = clients.map(function(c) {
+      var ivs = DB.interventions.filter(function(iv) { return iv.clientId === c.id; });
+      ivs.sort(function(a, b) { return b.date.localeCompare(a.date); });
+      var derniere = ivs[0];
+      var infoDerniere = derniere
+        ? '📅 ' + fmtFr(derniere.date) + ' — ' + (derniere.taches && derniere.taches.length ? derniere.taches.join(', ') : '—')
+        : 'Aucune intervention';
+      return '<div class="iv-item" style="max-width:100%" onclick="document.getElementById(\'overlayContrats\').classList.remove(\'open\');afficherFiche(\''+c.id+'\')">'
+        + '<div style="flex:1">'
+        + '<div style="font-weight:600">' + c.nom + (c.prenom ? ' ' + c.prenom : '') + '</div>'
+        + '<div style="font-size:12px;color:var(--texte-s);margin-top:3px">' + infoDerniere + '</div>'
+        + '</div></div>';
+    }).join('');
+  }
+  document.getElementById('overlayContrats').classList.add('open');
+}
 </script>
   <div class="overlay" id="overlayNotes">
   <div class="modal">
@@ -2172,6 +2198,15 @@ function sauvegarderNotes() {
     <div class="modal-actions">
       <button class="btn" onclick="fermerNotes()">Fermer</button>
       <button class="btn btn-vert" onclick="sauvegarderNotes()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+  <div class="overlay" id="overlayContrats">
+  <div class="modal">
+    <h3>🌿 Entretiens à l'année</h3>
+    <div id="contenuContrats" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="document.getElementById('overlayContrats').classList.remove('open')">Fermer</button>
     </div>
   </div>
 </div>
