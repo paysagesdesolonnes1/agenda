@@ -624,7 +624,9 @@ nav { background: var(--vert-c); padding: 0 14px; display: flex; align-items: ce
     <div class="fg"><label>Ville</label><input type="text" id="clientVille"></div>
     <div class="fg"><label>Notes</label><textarea id="clientNotes" rows="2" placeholder="Code portail, animaux..."></textarea></div>
     <div class="modal-actions">
-      <button onclick="alert('ça marche')">test</button>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600">
+         <input type="checkbox" id="clientEntretien" style="width:18px;height:18px;accent-color:var(--vert)">Entretien à l'année
+       </label>
     </div>
       <button class="btn" onclick="fermerModalClient()">Annuler</button>
       <button class="btn btn-rouge" id="btnSuppClient" style="display:none" onclick="supprimerClient()">Supprimer</button>
