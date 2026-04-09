@@ -2174,7 +2174,7 @@ function sauvegarderNotes() {
 }
 function ouvrirContrats() {
   var container = document.getElementById('contenuContrats');
-  var clients = DB.clients.filter(function(c) { return c.entretien; });
+  clients.sort(function(a, b) { return (a.nom||'').localeCompare(b.nom||''); });
   if (!clients.length) {
     container.innerHTML = '<p style="color:var(--texte-s);text-align:center;padding:20px;">Aucun client avec entretien à l\'année.</p>';
   } else {
