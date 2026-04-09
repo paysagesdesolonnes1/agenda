@@ -774,7 +774,8 @@ function showToast(msg) {
 // ══════════════════════════════════════
 //  NAVIGATION
 // ══════════════════════════════════════
-function showPage(id) {
+function showPage(id, noHistory) {
+  if (!noHistory) pushState({ page: id });
   pushState({ page: id });
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
@@ -798,15 +799,20 @@ function pushState(state) {
   history.pushState(state, '');
 }
 
+// État initial
+history.replaceState({ page: 'agenda' }, '');
+
 window.addEventListener('popstate', function(e) {
   var state = e.state;
   if (!state) { showPage('agenda'); return; }
   if (state.page === 'fiche') {
     afficherFiche(state.clientId, true);
   } else if (state.page === 'clients') {
-    showPage('clients');
-  } else if (state.page === 'agenda') {
-    showPage('agenda');
+    document.getElementById('vueFiche').style.display='none';
+    document.getElementById('vueClients').style.display='block';
+    afficherClients();
+  } else {
+    showPage(state.page, true);
   }
 });
   
