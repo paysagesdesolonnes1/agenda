@@ -133,11 +133,17 @@ nav { background: var(--vert-c); padding: 0 14px; display: flex; align-items: ce
 .creneau.annule { background: #c5d3ce; border-left: 3px solid var(--rouge); opacity: 0.7; }
 .creneau.en_cours { background: #E1F5EE; border-left: 3px solid var(--brun); }
 .en_cours .cr-nom { color: var(--brun); }
-.cr-nom { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cr-nom { 
+  font-size: 11px; 
+  font-weight: 700; 
+  white-space: normal; /* Autorise le retour à la ligne */
+  overflow-wrap: break-word; /* Coupe proprement si le mot est trop long pour la colonne */
+  overflow: hidden; /* Empêche le texte de déborder du bloc s'il est trop long verticalement */
+}
 .planifie .cr-nom { color: var(--vert); }
 .termine .cr-nom { color: #0F6E56; }
 .annule .cr-nom { color: var(--rouge); }
-.cr-taches { font-size: 10px; color: var(--texte-s); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cr-taches { font-size: 10px; color: var(--texte-s); white-space: normal; overflow-wrap: break-word; }
 
 .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 12px; }
 .overlay.open { display: flex; }
@@ -229,7 +235,14 @@ nav { background: var(--vert-c); padding: 0 14px; display: flex; align-items: ce
 .m-creneau.termine  { background: var(--rouge-c); border-left: 3px solid #0F6E56; color: #0F6E56; }
 .m-creneau.annule   { background: #c5d3ce; border-left: 3px solid var(--rouge); color: var(--rouge); opacity: 0.7; }
 .m-creneau.en_cours { background: #E1F5EE; border-left: 3px solid var(--brun); color: var(--brun); }
-.m-creneau b { display: block; white-space: nowrap; font-size: 10px; padding-left: 2px; font-weight: 700; }
+.m-creneau b { 
+  display: block; 
+  white-space: normal; 
+  overflow-wrap: break-word; 
+  font-size: 10px; 
+  padding-left: 2px; 
+  font-weight: 700; 
+}
 
 .search-agenda { max-width: 180px; margin-right: 8px; }
 
