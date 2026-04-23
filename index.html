@@ -699,6 +699,18 @@ function renderAgenda() {
 function changerSemaine(d){semaine.setDate(semaine.getDate()+d*7);renderAgenda();}
 function allerAujourdhui(){semaine=lundi(new Date());jourSelectionne=fmt(new Date());renderAgenda();}
 
+function allerADate(val) {
+  if (!val) return;
+  var d = new Date(val);
+  semaine = lundi(d);
+  jourSelectionne = fmt(d);
+  renderAgenda();
+}
+
+// ══════════════════════════════════════
+//  VUE MOBILE
+// ══════════════════════════════════════
+
 // ══════════════════════════════════════
 //  VUE MOBILE
 // ══════════════════════════════════════
