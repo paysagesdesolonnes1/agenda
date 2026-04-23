@@ -953,7 +953,7 @@ function dupliquerCreneau() {
 // ══════════════════════════════════════
 function afficherClients() {
   var q=(document.getElementById('searchClients').value||'').toLowerCase();
-  var tous=DB.clients.slice().sort(function(a,b){ var na=(a.nom||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); var nb=(b.nom||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); return na.localeCompare(nb); });
+  var tous=DB.clients.slice().sort(function(a,b){ var na=((a.nom||'')+' '+(a.prenom||'')).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); var nb=((b.nom||'')+' '+(b.prenom||'')).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); return na.localeCompare(nb); });
   var filtres=q?tous.filter(function(c){return ((c.prenom||'')+' '+c.nom+' '+(c.ville||'')).toLowerCase().includes(q);}):tous;
   var lettresPresentes={};
   tous.forEach(function(c){var l=normAlpha(c.nom);lettresPresentes[l]=true;});
