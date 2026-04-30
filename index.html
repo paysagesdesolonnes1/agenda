@@ -961,12 +961,17 @@ function dupliquerCreneau() {
 function afficherClients() {
   var q=(document.getElementById('searchClients').value||'').toLowerCase();
   var tous = DB.clients.slice().sort(function(a, b) {
-    // On prépare le nom complet (Nom + Prénom) pour chaque client
-    var na = ((a.nom || '') + ' ' + (a.prenom || '')).trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    var nb = ((b.nom || '') + ' ' + (b.prenom || '')).trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    
-    // On compare les deux chaînes de caractères
-    return na.localeCompare(nb, 'fr', { sensitivity: 'base' });
+    // Fonction interne pour nettoyer le nom avant de comparer
+    var purger = function(s) {
+      var k = (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+      // On retire "le ", "la ", "les " ou "l'" au début du nom pour le tri
+      return k.replace(/^(le|la|les|l')\s+/, '').replace(/\s+/g, '');
+    };
+
+    var na = purger(a.nom + ' ' + (a.prenom || ''));
+    var nb = purger(b.nom + ' ' + (b.prenom || ''));
+
+    return na.localeCompare(nb, 'fr');
   });
   var filtres=q?tous.filter(function(c){return ((c.prenom||'')+' '+c.nom+' '+(c.adresse||'')).toLowerCase().includes(q);}):tous;
   var lettresPresentes={};
