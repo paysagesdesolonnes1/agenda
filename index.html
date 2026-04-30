@@ -988,13 +988,13 @@ function filtrerClients(){filtreAlpha='';afficherClients();}
 function afficherFiche(id, noHistory) {
   if (!noHistory) pushState({ page: 'fiche', clientId: id });
   showPage('clients');
-  var c=DB.clients.find(function(x){return x.id===id;});
-  if(!c) return;
-  clientCourant=c;
-  document.getElementById('vueClients').style.display='none';
-  var fiche=document.getElementById('vueFiche');
-  fiche.style.display='block';
-  var ivs = DB.interventions.filter(function(iv){ return iv.clientId===c.id && iv.date; }).sort(function(a,b){return b.date.localeCompare(a.date);});
+  var c = DB.clients.find(function(x){ return x.id === id; });
+  if (!c) return;
+  clientCourant = c;
+  document.getElementById('vueClients').style.display = 'none';
+  var fiche = document.getElementById('vueFiche');
+  fiche.style.display = 'block';
+  var ivs = DB.interventions.filter(function(iv){ return iv.clientId === c.id && iv.date; }).sort(function(a,b){ return b.date.localeCompare(a.date); });
   var anneesMap = {};
   ivs.forEach(function(iv) {
     var annee = (iv.date || "Sans date").substring(0, 4);
@@ -1023,7 +1023,6 @@ function afficherFiche(id, noHistory) {
     ts.forEach(function(e) { statsGlobalHtml += '<div class="stat-card"><div class="stat-val">'+e[1].count+'</div><div style="font-size:11px; font-weight:600; color:var(--vert-m); margin-top:-4px; margin-bottom:2px;">('+e[1].h.toFixed(1)+'h)</div><div class="stat-lab">'+e[0]+'</div></div>'; });
     statsGlobalHtml += '</div>';
   });
-  var init=((c.nom?c.nom[0]:'')+(c.prenom?c.prenom[0]:'')).toUpperCase();
   var devisHtml = '<div class="titre-fiche" style="display:flex; align-items:center; gap:12px;"><span>Devis, factures & Documents</span><button class="btn btn-sm btn-vert" onclick="ouvrirModalDevis()">+ Ajouter</button></div>';
   if (c.devis && c.devis.length > 0) {
     c.devis.forEach(function(d, idx) {
@@ -1046,12 +1045,12 @@ function afficherFiche(id, noHistory) {
     var lesTaches = (iv.taches && iv.taches.length > 0) ? iv.taches.join(', ') : '—';
     return '<div class="iv-item" onclick="ouvrirCreneau(\''+iv.id+'\')"><div class="iv-date"><div class="iv-jour">'+d.getDate()+'</div><div class="iv-mois">'+MOIS[d.getMonth()]+'</div></div><div style="flex:1"><div style="font-weight:500">'+lesTaches+' <span class="badge '+bc+'">'+bl+'</span></div><div style="font-size:12px;color:#5F5E5A;margin-top:2px">'+(iv.heureDebut||'')+' '+(iv.heureFin?'– '+iv.heureFin:'')+' '+dur+(iv.collab?' · '+iv.collab:'')+'</div>'+(iv.note?'<div style="font-size:12px;color:#5F5E5A;font-style:italic">'+iv.note+'</div>':'')+'</div></div>';
   }).join('') : '<div style="color:#5F5E5A; font-style:italic; font-size:13px; max-width:600px; margin:0 auto; padding:0 10px;">Aucune intervention.</div>';
+
   fiche.innerHTML='<button class="back-btn" onclick="retourClients()">← Retour aux clients</button>'
     +'<div class="fiche-header" style="max-width:600px; margin:0 auto 16px auto;"><div class="fiche-init">'+init+'</div><div style="flex:1"><div style="display:flex; align-items:center; gap:12px;"><div style="font-size:18px;font-weight:600">'+c.nom+(c.prenom?' '+c.prenom:'')+'</div><button class="btn btn-sm" onclick="ouvrirModalClient(\''+c.id+'\')">Modifier</button></div><div style="font-size:13px;color:#5F5E5A;margin-top:2px;">'+[c.tel,c.email].filter(Boolean).join(' · ')+'</div>' 
     + (c.adresse ? '<div style="margin-top:10px;"><div style="font-size:13px; color:var(--texte); margin-bottom:6px; font-weight:500;">📍 ' + c.adresse + '</div><a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(c.adresse) + '" target="_blank" style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; background:white; color:var(--texte-s); border:1px solid var(--border); border-radius:4px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; text-decoration:none; box-shadow:0 1px 2px rgba(0,0,0,0.05);">🗺️ Ouvrir la carte</a></div>' : '') 
     + (c.notes?'<div style="font-size:12px;color:#5F5E5A;font-style:italic;margin-top:2px">'+c.notes+'</div>':'')+'</div></div>'
     + statsGlobalHtml + devisHtml + ivHtml;
-}
 }
 
 function retourClients(){ pushState({ page: 'clients' }); document.getElementById('vueFiche').style.display='none'; document.getElementById('vueClients').style.display='block'; afficherClients(); }
