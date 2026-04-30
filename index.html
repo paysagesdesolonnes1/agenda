@@ -868,12 +868,20 @@ function filtrerAC(){
   if(!q){list.style.display='none';return;}
   var m=DB.clients.filter(function(c){return ((c.prenom||'')+' '+c.nom).toLowerCase().includes(q)||c.nom.toLowerCase().includes(q);}).slice(0,8);
   if(!m.length){list.style.display='none';return;}
-  list.innerHTML=m.map(function(c){ return '<div class="ac-item" data-id="'+c.id+'" onmousedown="selClient(\''+c.id+'\')">'+c.nom+(c.prenom?' '+c.prenom:'')+' <span style="font-size:11px;color:#888">'+(c.Adresse||'')+'</span></div>'; }).join('');
+  list.innerHTML=m.map(function(c){ return '<div class="ac-item" data-id="'+c.id+'" onmousedown="selClient(\''+c.id+'\')">'+c.nom+(c.prenom?' '+c.prenom:'')+' <span style="font-size:11px;color:#888">'+(c.adresse||'')+'</span></div>'; }).join('');
   list.style.display='block';
 }
 
-function selClient(id){ var c=DB.clients.find(function(x){return x.id===id;}); if(!c) return; clientSel=c; document.getElementById('inputClient').value=(c.prenom?c.prenom+' ':'')+c.nom; if(c.adresse&&!document.getElementById('inputLieu').value) document.getElementById('inputLieu').value=c.adresse; document.getElementById('acList').style.display='none'; }
-
+function selClient(id){ 
+  var c=DB.clients.find(function(x){return x.id===id;}); 
+  if(!c) return;
+  clientSel=c; 
+  document.getElementById('inputClient').value=(c.prenom?c.prenom+' ':'')+c.nom; 
+  // On remplit l'adresse dès qu'elle existe pour ce client
+  if(c.adresse) document.getElementById('inputLieu').value=c.adresse; 
+  document.getElementById('acList').style.display='none'; 
+}
+  
 function creerClientRapide() {
   var nomComplet = document.getElementById('inputClient').value.trim();
   if (!nomComplet) { showToast('Tapez d\'abord un nom et un prénom.'); return; }
@@ -953,7 +961,7 @@ function dupliquerCreneau() {
 function afficherClients() {
   var q=(document.getElementById('searchClients').value||'').toLowerCase();
   var tous=DB.clients.slice().sort(function(a,b){ var na=((a.nom||'')+' '+(a.prenom||'')).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); var nb=((b.nom||'')+' '+(b.prenom||'')).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); return na.localeCompare(nb); });
-  var filtres=q?tous.filter(function(c){return ((c.prenom||'')+' '+c.nom+' '+(c.Adresse||'')).toLowerCase().includes(q);}):tous;
+  var filtres=q?tous.filter(function(c){return ((c.prenom||'')+' '+c.nom+' '+(c.adresse||'')).toLowerCase().includes(q);}):tous;
   var lettresPresentes={};
   tous.forEach(function(c){var l=normAlpha(c.nom);lettresPresentes[l]=true;});
   var alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
@@ -972,7 +980,7 @@ function afficherClients() {
       var ivs=DB.interventions.filter(function(iv){return iv.clientId===c.id;});
       var h=ivs.reduce(function(s,iv){return s+duree(iv.heureDebut,iv.heureFin);},0);
       var init=((c.prenom?c.prenom[0]:'')+(c.nom?c.nom[0]:'')).toUpperCase();
-      html+='<div class="client-card" onclick="afficherFiche(\''+c.id+'\')"><div class="initiales">'+init+'</div><div class="client-info"><div class="client-nom">'+c.nom+(c.prenom?' '+c.prenom:'')+'</div><div class="client-meta">'+(c.Adresse||c.adresse||'')+'</div></div><div class="client-stats"><div class="cs"><div class="cs-val">'+ivs.length+'</div><div class="cs-lab">interv.</div></div><div class="cs"><div class="cs-val">'+h.toFixed(1)+'h</div><div class="cs-lab">heures</div></div></div></div>';
+      html+='<div class="client-card" onclick="afficherFiche(\''+c.id+'\')"><div class="initiales">'+init+'</div><div class="client-info"><div class="client-nom">'+c.nom+(c.prenom?' '+c.prenom:'')+'</div><div class="client-meta">'+(c.adresse||c.adresse||'')+'</div></div><div class="client-stats"><div class="cs"><div class="cs-val">'+ivs.length+'</div><div class="cs-lab">interv.</div></div><div class="cs"><div class="cs-val">'+h.toFixed(1)+'h</div><div class="cs-lab">heures</div></div></div></div>';
     });
     html+='</div></div>';
   });
