@@ -419,7 +419,11 @@ nav { background: var(--vert-c); padding: 0 14px; display: flex; align-items: ce
         <input type="time" id="inputHFin" onchange="majDureeCreneau()">
       </div>
     </div>
-    <div class="fg"><label>Lieu / Adresse</label><input type="text" id="inputLieu" placeholder="Adresse du chantier"></div>
+    <div class="fg">
+  <label>Lieu / Adresse</label>
+  <input type="text" id="inputLieu" placeholder="Adresse du chantier" oninput="majBoutonMapsCreneau()">
+  <div id="btnMapsCreneauContainer"></div>
+</div>
     <div class="fg"><label>Remarques</label><textarea id="inputNote" rows="2" placeholder="Notes, observations..."></textarea></div>
     <div class="fg" id="fgStatut"><label>Statut</label>
       <select id="inputStatut">
@@ -831,6 +835,8 @@ function ouvrirNouveauCreneau(dateStr, heure) {
   document.getElementById('inputStatut').value='planifie';
   document.getElementById('btnSuppC').style.display='none';
   renderTaches(); peuplerCollab(); peuplerTagPredefs();
+  
+  majBoutonMapsCreneau(); // <--- AJOUT ICI
   document.getElementById('overlayC').classList.add('open');
   setTimeout(function(){document.getElementById('inputClient').focus();},100);
 }
@@ -851,6 +857,8 @@ function ouvrirCreneau(id) {
   document.getElementById('fgStatut').style.display='block';
   document.getElementById('btnSuppC').style.display='inline-block';
   renderTaches(); peuplerCollab(iv.collab); peuplerTagPredefs();
+  
+  majBoutonMapsCreneau(); // <--- AJOUT ICI
   document.getElementById('overlayC').classList.add('open');
 }
 
@@ -877,8 +885,10 @@ function selClient(id){
   if(!c) return;
   clientSel=c; 
   document.getElementById('inputClient').value=(c.prenom?c.prenom+' ':'')+c.nom; 
-  // On remplit l'adresse dès qu'elle existe pour ce client
-  if(c.adresse) document.getElementById('inputLieu').value=c.adresse; 
+  if(c.adresse) {
+    document.getElementById('inputLieu').value=c.adresse;
+    majBoutonMapsCreneau(); // <--- AJOUT ICI
+  }
   document.getElementById('acList').style.display='none'; 
 }
   
@@ -1542,6 +1552,16 @@ if (DB.supabaseUrl && DB.supabaseKey) {
 calculerRappels();
 setInterval(calculerRappels, 60000);
 
+function majBoutonMapsCreneau() {
+  var addr = document.getElementById('inputLieu').value.trim();
+  var container = document.getElementById('btnMapsCreneauContainer');
+  if (addr) {
+    container.innerHTML = '<div style="margin-top:8px;"><a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(addr) + '" target="_blank" style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; background:white; color:var(--texte-s); border:1px solid var(--border); border-radius:4px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; text-decoration:none; box-shadow:0 1px 2px rgba(0,0,0,0.05);">🗺️ Ouvrir la carte</a></div>';
+  } else {
+    container.innerHTML = '';
+  }
+}
+  
 // ══════════════════════════════════════
 //  GESTION DU CLAVIER (Touche Entrée)
 // ══════════════════════════════════════
