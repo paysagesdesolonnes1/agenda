@@ -90,7 +90,7 @@ async function run() {
       </p>
     </div>`;
 
-  await fetch('https://api.brevo.com/v3/smtp/email', {
+  const reponseBrevo = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
     headers: { 'api-key': BREVO_KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -101,7 +101,12 @@ async function run() {
     })
   });
 
-  console.log(`Email envoyé pour ${aRelancer.length} client(s).`);
+  if (!reponseBrevo.ok) {
+    const erreur = await reponseBrevo.text();
+    console.error(`❌ Brevo a refusé l'envoi :`, erreur);
+  } else {
+    console.log(`✅ Email envoyé avec succès pour ${aRelancer.length} client(s).`);
+  }
 }
 
 run().catch(e => { console.error(e); process.exit(1); });
