@@ -447,8 +447,7 @@ nav { background: var(--vert-c); padding: 0 14px; display: flex; align-items: ce
     </div>
     <div class="fg"><label>Téléphone</label><input type="tel" id="clientTel"></div>
     <div class="fg"><label>Email</label><input type="email" id="clientEmail"></div>
-    <div class="fg"><label>Adresse principale</label><input type="text" id="clientAdresse"></div>
-    <div class="fg"><label>Ville</label><input type="text" id="clientVille"></div>
+    <div class="fg"><label>Adresse complète</label><input type="text" id="clientAdresse" placeholder="Ex: 10 Imp. des bleuets, 85100 Les Sables-d'Olonne"></div>
     <div class="fg"><label>Notes</label><textarea id="clientNotes" rows="2" placeholder="Code portail, animaux..."></textarea></div>
     <div style="margin-top:16px;margin-bottom:10px">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600">
@@ -869,7 +868,7 @@ function filtrerAC(){
   if(!q){list.style.display='none';return;}
   var m=DB.clients.filter(function(c){return ((c.prenom||'')+' '+c.nom).toLowerCase().includes(q)||c.nom.toLowerCase().includes(q);}).slice(0,8);
   if(!m.length){list.style.display='none';return;}
-  list.innerHTML=m.map(function(c){ return '<div class="ac-item" data-id="'+c.id+'" onmousedown="selClient(\''+c.id+'\')">'+c.nom+(c.prenom?' '+c.prenom:'')+' <span style="font-size:11px;color:#888">'+(c.ville||'')+'</span></div>'; }).join('');
+  list.innerHTML=m.map(function(c){ return '<div class="ac-item" data-id="'+c.id+'" onmousedown="selClient(\''+c.id+'\')">'+c.nom+(c.prenom?' '+c.prenom:'')+' <span style="font-size:11px;color:#888">'+(c.Adresse||'')+'</span></div>'; }).join('');
   list.style.display='block';
 }
 
@@ -882,7 +881,7 @@ function creerClientRapide() {
   var nom = parts[0];
   var prenom = '';
   if (parts.length > 1) { parts.shift(); prenom = parts.join(' '); }
-  var nouveauClient = { id: genId(), prenom: prenom, nom: nom, tel: '', email: '', adresse: '', ville: '', notes: '' };
+  var nouveauClient = { id: genId(), prenom: prenom, nom: nom, tel: '', email: '', adresse: '', notes: '' };
   DB.clients.push(nouveauClient);
   saveLocal();
   afficherClients();
@@ -954,7 +953,7 @@ function dupliquerCreneau() {
 function afficherClients() {
   var q=(document.getElementById('searchClients').value||'').toLowerCase();
   var tous=DB.clients.slice().sort(function(a,b){ var na=((a.nom||'')+' '+(a.prenom||'')).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); var nb=((b.nom||'')+' '+(b.prenom||'')).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); return na.localeCompare(nb); });
-  var filtres=q?tous.filter(function(c){return ((c.prenom||'')+' '+c.nom+' '+(c.ville||'')).toLowerCase().includes(q);}):tous;
+  var filtres=q?tous.filter(function(c){return ((c.prenom||'')+' '+c.nom+' '+(c.Adresse||'')).toLowerCase().includes(q);}):tous;
   var lettresPresentes={};
   tous.forEach(function(c){var l=normAlpha(c.nom);lettresPresentes[l]=true;});
   var alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
@@ -973,7 +972,7 @@ function afficherClients() {
       var ivs=DB.interventions.filter(function(iv){return iv.clientId===c.id;});
       var h=ivs.reduce(function(s,iv){return s+duree(iv.heureDebut,iv.heureFin);},0);
       var init=((c.prenom?c.prenom[0]:'')+(c.nom?c.nom[0]:'')).toUpperCase();
-      html+='<div class="client-card" onclick="afficherFiche(\''+c.id+'\')"><div class="initiales">'+init+'</div><div class="client-info"><div class="client-nom">'+c.nom+(c.prenom?' '+c.prenom:'')+'</div><div class="client-meta">'+(c.ville||c.adresse||'')+'</div></div><div class="client-stats"><div class="cs"><div class="cs-val">'+ivs.length+'</div><div class="cs-lab">interv.</div></div><div class="cs"><div class="cs-val">'+h.toFixed(1)+'h</div><div class="cs-lab">heures</div></div></div></div>';
+      html+='<div class="client-card" onclick="afficherFiche(\''+c.id+'\')"><div class="initiales">'+init+'</div><div class="client-info"><div class="client-nom">'+c.nom+(c.prenom?' '+c.prenom:'')+'</div><div class="client-meta">'+(c.Adresse||c.adresse||'')+'</div></div><div class="client-stats"><div class="cs"><div class="cs-val">'+ivs.length+'</div><div class="cs-lab">interv.</div></div><div class="cs"><div class="cs-val">'+h.toFixed(1)+'h</div><div class="cs-lab">heures</div></div></div></div>';
     });
     html+='</div></div>';
   });
@@ -1048,7 +1047,7 @@ function afficherFiche(id, noHistory) {
     return '<div class="iv-item" onclick="ouvrirCreneau(\''+iv.id+'\')"><div class="iv-date"><div class="iv-jour">'+d.getDate()+'</div><div class="iv-mois">'+MOIS[d.getMonth()]+'</div></div><div style="flex:1"><div style="font-weight:500">'+lesTaches+' <span class="badge '+bc+'">'+bl+'</span></div><div style="font-size:12px;color:#5F5E5A;margin-top:2px">'+(iv.heureDebut||'')+' '+(iv.heureFin?'– '+iv.heureFin:'')+' '+dur+(iv.collab?' · '+iv.collab:'')+'</div>'+(iv.note?'<div style="font-size:12px;color:#5F5E5A;font-style:italic">'+iv.note+'</div>':'')+'</div></div>';
   }).join('') : '<div style="color:#5F5E5A; font-style:italic; font-size:13px; max-width:600px; margin:0 auto; padding:0 10px;">Aucune intervention.</div>';
   fiche.innerHTML='<button class="back-btn" onclick="retourClients()">← Retour aux clients</button>'
-    +'<div class="fiche-header" style="max-width:600px; margin:0 auto 16px auto;"><div class="fiche-init">'+init+'</div><div style="flex:1"><div style="display:flex; align-items:center; gap:12px;"><div style="font-size:18px;font-weight:600">'+c.nom+(c.prenom?' '+c.prenom:'')+'</div><button class="btn btn-sm" onclick="ouvrirModalClient(\''+c.id+'\')">Modifier</button></div><div style="font-size:13px;color:#5F5E5A;margin-top:2px;">'+[c.tel,c.email,c.ville].filter(Boolean).join(' · ')+'</div>'+(c.notes?'<div style="font-size:12px;color:#5F5E5A;font-style:italic;margin-top:2px">'+c.notes+'</div>':'')+'</div></div>'
+    +'<div class="fiche-header" style="max-width:600px; margin:0 auto 16px auto;"><div class="fiche-init">'+init+'</div><div style="flex:1"><div style="display:flex; align-items:center; gap:12px;"><div style="font-size:18px;font-weight:600">'+c.nom+(c.prenom?' '+c.prenom:'')+'</div><button class="btn btn-sm" onclick="ouvrirModalClient(\''+c.id+'\')">Modifier</button></div><div style="font-size:13px;color:#5F5E5A;margin-top:2px;">'+[c.tel,c.email,c.Adresse].filter(Boolean).join(' · ')+'</div>'+(c.notes?'<div style="font-size:12px;color:#5F5E5A;font-style:italic;margin-top:2px">'+c.notes+'</div>':'')+'</div></div>'
     + statsGlobalHtml + devisHtml + ivHtml;
 }
 
@@ -1065,7 +1064,6 @@ function ouvrirModalClient(id){
   document.getElementById('clientTel').value=clientCourant?clientCourant.tel||'':'';
   document.getElementById('clientEmail').value=clientCourant?clientCourant.email||'':'';
   document.getElementById('clientAdresse').value=clientCourant?clientCourant.adresse||'':'';
-  document.getElementById('clientVille').value=clientCourant?clientCourant.ville||'':'';
   document.getElementById('clientNotes').value=clientCourant?clientCourant.notes||'':'';
   document.getElementById('clientEntretien').checked = clientCourant ? clientCourant.entretien || false : false;
   document.getElementById('btnSuppClient').style.display=clientCourant?'inline-block':'none';
@@ -1083,7 +1081,6 @@ function sauvegarderClient(){
   c.tel=document.getElementById('clientTel').value.trim();
   c.email=document.getElementById('clientEmail').value.trim();
   c.adresse=document.getElementById('clientAdresse').value.trim();
-  c.ville=document.getElementById('clientVille').value.trim();
   c.notes=document.getElementById('clientNotes').value.trim();
   c.entretien = document.getElementById('clientEntretien').checked;
   if(clientCourant){var idx=DB.clients.findIndex(function(x){return x.id===c.id;});DB.clients[idx]=c;}
