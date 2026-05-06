@@ -1654,10 +1654,13 @@ document.addEventListener('keydown', function(e) {
     }
   }
 
-  window.addEventListener('load', async () => {
+window.addEventListener('load', async () => {
     // Utilise supabaseClient ici aussi
     const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) document.getElementById('loginScreen').style.display = 'none';
+    if (session) {
+      document.getElementById('loginScreen').style.display = 'none';
+      demarrer(); // <-- C'est cette ligne qui manquait pour tout lancer !
+    }
   });
 </script>
   
