@@ -1141,7 +1141,7 @@ function ouvrirModalClient(id){
   document.getElementById('clientEmail').value=clientCourant?clientCourant.email||'':'';
   document.getElementById('clientAdresse').value=clientCourant?clientCourant.adresse||'':'';
   document.getElementById('clientNotes').value=clientCourant?clientCourant.notes||'':'';
-  document.getElementById('clientEntretien').checked = clientCourant ? clientCourant.entretien || false : false;
+  document.getElementById('clientEntretien').checked = clientCourant ? (clientCourant.entretien === true || clientCourant.entretien === 'true') : false;
   document.getElementById('btnSuppClient').style.display=clientCourant?'inline-block':'none';
   document.getElementById('overlayClient').classList.add('open');
 }
