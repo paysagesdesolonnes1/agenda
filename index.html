@@ -284,12 +284,13 @@ nav { background: var(--vert-c); padding: 0 14px; display: flex; align-items: ce
 </style>
 </head>
 <body>
-  <div id="loginScreen">
+ <div id="loginScreen">
   <div style="font-size: 2rem;">🌿</div>
   <h2>Paysages des Olonnes</h2>
-  <input type="password" id="loginInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')verifierMdp()">
-  <button onclick="verifierMdp()">Accéder</button>
-  <div class="err" id="loginErr">Mot de passe incorrect.</div>
+  <input type="email" id="loginEmail" placeholder="Votre email" style="margin-bottom: 8px;">
+  <input type="password" id="loginInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')verifierConnexion()">
+  <button onclick="verifierConnexion()">Se connecter</button>
+  <div class="err" id="loginErr">Identifiants incorrects.</div>
 </div>
 <div id="loadingScreen">
   <div class="spinner"></div>
@@ -1617,5 +1618,40 @@ document.addEventListener('keydown', function(e) {
   }
 });
 </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+  async function verifierConnexion() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginInput').value;
+    const errorDiv = document.getElementById('loginErr');
+    
+    // Récupération des clés que tu as saisies dans l'onglet "Paramètres"
+    const url = document.getElementById('paramSupabaseUrl').value || localStorage.getItem('supabaseUrl');
+    const key = document.getElementById('paramSupabaseKey').value || localStorage.getItem('supabaseKey');
+
+    if (!url || !key) {
+      alert("Configue l'URL et la Clé dans les paramètres d'abord !");
+      return;
+    }
+
+    const supabase = supabase.createClient(url, key);
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
+
+    if (error) {
+      errorDiv.style.display = 'block';
+      errorDiv.innerText = "Erreur : " + error.message;
+    } else {
+      document.getElementById('loginScreen').style.display = 'none';
+      // Optionnel : recharger les données après connexion
+      if(typeof initialiserApp === 'function') initialiserApp(); 
+    }
+  }
+</script>
+  
 </body>
 </html>
