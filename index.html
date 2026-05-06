@@ -270,9 +270,27 @@ nav { background: var(--vert-c); padding: 0 14px; display: flex; align-items: ce
   .barre-mobile-extra { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
 }
 .rappels-panel { z-index: 10000 !important; }
+
+#loginScreen {
+  position: fixed; inset: 0; background: #f4f5f7;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; z-index: 9999;
+}
+#loginScreen h2 { font-size: 1.2rem; color: #5c7c32; font-weight: 700; }
+#loginScreen input { padding: 10px 14px; border: 1px solid #D3D1C7; border-radius: 8px; font-size: 15px; width: 240px; text-align: center; }
+#loginScreen button { padding: 10px 24px; background: #539d15; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+#loginScreen .err { color: #A32D2D; font-size: 13px; display: none; }
+  
 </style>
 </head>
 <body>
+  <div id="loginScreen">
+  <div style="font-size: 2rem;">🌿</div>
+  <h2>Paysages des Olonnes</h2>
+  <input type="password" id="loginInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')verifierMdp()">
+  <button onclick="verifierMdp()">Accéder</button>
+  <div class="err" id="loginErr">Mot de passe incorrect.</div>
+</div>
 <div id="loadingScreen">
   <div class="spinner"></div>
   <h2>Paysages des Olonnes</h2>
@@ -542,6 +560,31 @@ nav { background: var(--vert-c); padding: 0 14px; display: flex; align-items: ce
 <div class="toast" id="toast"></div>
 
 <script>
+
+var MDP = 'pdo2025'; // ← change ici
+
+function verifierMdp() {
+  var val = document.getElementById('loginInput').value;
+  if (val === MDP) {
+    localStorage.setItem('pdo_auth', btoa(MDP));
+    document.getElementById('loginScreen').style.display = 'none';
+    demarrer();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+    document.getElementById('loginInput').value = '';
+    document.getElementById('loginInput').focus();
+  }
+}
+
+function demarrer() {
+  loadLocal();
+  renderAgenda();
+  if (DB.supabaseUrl && DB.supabaseKey) { syncMaintenant(); }
+  else { document.getElementById('loadingScreen').style.display = 'none'; }
+  calculerRappels();
+  setInterval(calculerRappels, 60000);
+}
+  
 // ══════════════════════════════════════
 //  ÉTAT GLOBAL
 // ══════════════════════════════════════
@@ -1542,14 +1585,14 @@ function fermerListeDevis() { document.getElementById('overlayListeDevis').class
 // ══════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════
-loadLocal();
-renderAgenda();
-if (DB.supabaseUrl && DB.supabaseKey) {
-  syncMaintenant();
+var auth = localStorage.getItem('pdo_auth');
+if (auth && atob(auth) === MDP) {
+  document.getElementById('loginScreen').style.display = 'none';
+  demarrer();
 } else {
   document.getElementById('loadingScreen').style.display = 'none';
+  setTimeout(function(){ document.getElementById('loginInput').focus(); }, 100);
 }
-calculerRappels();
 setInterval(calculerRappels, 60000);
 
 function majBoutonMapsCreneau() {
