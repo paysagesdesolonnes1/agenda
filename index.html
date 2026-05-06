@@ -1621,21 +1621,22 @@ document.addEventListener('keydown', function(e) {
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script>
+  // --- CONFIGURATION FIXE ---
+  const SUPABASE_URL = "https://bflforeyyvfpabfqnizw.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_dvWC1dUx1SuelJQvSRCQdA_LCS9tXXA";     
+  
+  // Initialisation immédiate
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
   async function verifierConnexion() {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginInput').value;
     const errorDiv = document.getElementById('loginErr');
-    
-    // Récupération des clés que tu as saisies dans l'onglet "Paramètres"
-    const url = document.getElementById('paramSupabaseUrl').value || localStorage.getItem('supabaseUrl');
-    const key = document.getElementById('paramSupabaseKey').value || localStorage.getItem('supabaseKey');
 
-    if (!url || !key) {
-      alert("Configue l'URL et la Clé dans les paramètres d'abord !");
-      return;
-    }
-
-    const supabase = supabase.createClient(url, key);
+    // On montre le chargement (optionnel)
+    const btn = document.querySelector('#loginScreen button');
+    btn.innerText = "Connexion...";
+    btn.disabled = true;
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
@@ -1644,13 +1645,31 @@ document.addEventListener('keydown', function(e) {
 
     if (error) {
       errorDiv.style.display = 'block';
-      errorDiv.innerText = "Erreur : " + error.message;
+      errorDiv.innerText = "Accès refusé : " + error.message;
+      btn.innerText = "Accéder";
+      btn.disabled = false;
     } else {
+      // VICTOIRE : On cache l'écran de login
       document.getElementById('loginScreen').style.display = 'none';
-      // Optionnel : recharger les données après connexion
-      if(typeof initialiserApp === 'function') initialiserApp(); 
+      
+      // On lance l'application (Claude a dû créer une fonction d'initialisation)
+      if (typeof initialiserApp === 'function') {
+          initialiserApp();
+      } else {
+          // Si pas de fonction dédiée, on recharge simplement pour que le 
+          // reste du code de Claude détecte la session active.
+          location.reload(); 
+      }
     }
   }
+
+  // Vérifier si on est déjà connecté au chargement de la page
+  window.onload = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      document.getElementById('loginScreen').style.display = 'none';
+    }
+  };
 </script>
   
 </body>
